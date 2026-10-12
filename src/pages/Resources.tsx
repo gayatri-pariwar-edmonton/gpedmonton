@@ -19,7 +19,7 @@ const Resources = forwardRef<HTMLElement>((_, ref) => {
   });
 
   useEffect(() => {
-    fetch("https://gpedmonton-backend.onrender.com/api/media")
+    fetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/media")
       .then((res) => res.json())
       .then((data) => setMedia(data))
       .catch((err) => console.error("Error fetching media:", err));
@@ -37,7 +37,7 @@ const Resources = forwardRef<HTMLElement>((_, ref) => {
               <MusicCard
                 key={item._id}
                 name={item.title}
-                audioUrl={`https://gpedmonton-backend.onrender.com/api/proxy/audio/${item.driveFileId}`}
+                audioUrl={`https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/proxy/audio/${item.driveFileId}`}
               />
             ))
           ) : (

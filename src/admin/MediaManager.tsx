@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./MediaManager.css";
+import { adminFetch } from "../utils/adminAuth";
 
 interface MediaData {
   _id?: string;
@@ -21,7 +22,7 @@ const MediaManager: React.FC = () => {
 
   // Fetch music + videos on mount
   useEffect(() => {
-    fetch("https://gpedmonton-backend.onrender.com/api/media")
+    adminFetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/media")
       .then((res) => res.json())
       .then((data) => setMedia(data))
       .catch((err) => console.error("Error fetching media:", err));
@@ -51,7 +52,7 @@ const MediaManager: React.FC = () => {
         formData.append("title", newMedia.title);
         formData.append("audio", file);
 
-        res = await fetch("https://gpedmonton-backend.onrender.com/api/media/music/upload", {
+        res = await adminFetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/media/music/upload", {
           method: "POST",
           body: formData,
         });
@@ -59,7 +60,7 @@ const MediaManager: React.FC = () => {
         const data = await res.json();
         setMedia((prev) => ({ ...prev, music: [...prev.music, data] }));
       } else {
-        res = await fetch("https://gpedmonton-backend.onrender.com/api/media/video/upload", {
+        res = await adminFetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/media/video/upload", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -87,7 +88,7 @@ const MediaManager: React.FC = () => {
     if (!window.confirm("Are you sure you want to delete this item?")) return;
 
     try {
-      const res = await fetch(`https://gpedmonton-backend.onrender.com/api/media/${id}`, {
+      const res = await adminFetch(`https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/media/${id}`, {
         method: "DELETE",
       });
 
@@ -160,7 +161,7 @@ const MediaManager: React.FC = () => {
                 <h4>{m.title}</h4>
                 {m.audioUrl && (
                   <audio controls>
-                    <source src={`https://gpedmonton-backend.onrender.com/api/proxy/audio/${m.driveFileId}`} type="audio/mpeg" />
+                    <source src={`https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/proxy/audio/${m.driveFileId}`} type="audio/mpeg" />
                   </audio>
                 )}
                 <button

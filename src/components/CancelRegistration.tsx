@@ -10,26 +10,14 @@ const CancelRegistration: React.FC = () => {
   useEffect(() => {
     const cancelRegistration = async () => {
       try {
-        console.log("Fetching registration info for ID:", id);
-        const regRes = await fetch(`https://gpedmonton-backend.onrender.com/api/registrations/id/${id}`);
-
-        if (!regRes.ok) {
-          console.log("Registration fetch failed:", regRes.status);
-          setStatus("Registration not found or already cancelled.");
-          return;
-        }
-
-        const registration = await regRes.json();
-        console.log("Fetched registration:", registration);
-        setEventName(registration.eventName);
-
-        console.log("Deleting registration...");
-        const delRes = await fetch(`https://gpedmonton-backend.onrender.com/api/registrations/${id}`, {
+        const delRes = await fetch(`https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/registrations/cancel/${id}`, {
           method: "DELETE",
         });
 
         if (delRes.ok) {
-          setStatus(`Your registration for "${registration.eventName}" has been successfully cancelled.`);
+          const result = await delRes.json();
+          setEventName(result.eventName);
+          setStatus(`Your registration for "${result.eventName}" has been successfully cancelled.`);
         } else if (delRes.status === 404) {
           setStatus("Registration not found or already cancelled.");
         } else {

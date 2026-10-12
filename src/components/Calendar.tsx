@@ -34,7 +34,7 @@ const Calendar: React.FC = () => {
     });
 
   useEffect(() => {
-    fetch("https://gpedmonton-backend.onrender.com/api/events/upcoming")
+    fetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/events/upcoming")
       .then((res) => res.json())
       .then((data) => setEvents(data))
       .catch((err) => console.error("Error fetching events:", err));

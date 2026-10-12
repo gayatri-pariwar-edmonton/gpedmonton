@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import './EventRegistrationForm.css'
 import squareLogo from '../assets/images/square-logo.png'
@@ -28,26 +28,16 @@ const EventRegistrationForm: React.FC = () => {
   const location = useLocation();
   const state = location.state as LocationState;
   const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState("");
   
   const onSubmit = async (data: FormData) => {
     const eventName = state?.eventName || eventNameFromParams || "Unknown Event";
 
-    const existingRes = await fetch(
-      `https://gpedmonton-backend.onrender.com/api/registrations/${encodeURIComponent(eventName)}`
-    );
-    const existingRegs = await existingRes.json();
-
-    const alreadyRegistered = existingRegs.some(
-      (r: any) => r.email.toLowerCase() === data.email.toLowerCase()
-    );
-
-    if (alreadyRegistered) {
-      alert("You have already registered for this event!");
-      return;
-    }
-
     try {
-      const saveRes = await fetch("https://gpedmonton-backend.onrender.com/api/registrations", {
+      setSubmitting(true);
+      setSubmitMessage("");
+      const saveRes = await fetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/registrations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -56,14 +46,21 @@ const EventRegistrationForm: React.FC = () => {
         }),
       });
 
-      if (!saveRes.ok) throw new Error("Failed to submit registration");
+      if (saveRes.status === 409) {
+        setSubmitMessage("You have already registered for this event.");
+        return;
+      }
+      if (!saveRes.ok) {
+        const failure = await saveRes.json().catch(() => ({})) as { message?: string };
+        throw new Error(failure.message || "Failed to submit registration");
+      }
 
       const result = await saveRes.json();
       console.log("Registration saved:", result);
 
       // const registrationId = result.registration._id;
 
-      // const mailRes = await fetch("https://gpedmonton-backend.onrender.com/api/mail/register", {
+      // const mailRes = await fetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/mail/register", {
       //   method: "POST",
       //   headers: { "Content-Type": "application/json" },
       //   body: JSON.stringify({
@@ -81,12 +78,13 @@ const EventRegistrationForm: React.FC = () => {
       // if (!mailRes.ok) throw new Error("Failed to send confirmation email.");
       // console.log("Confirmation email sent.");
 
-      alert(`Registration successful for ${eventName}!`);
-
-      navigate("/events");
+      setSubmitMessage(`Registration successful for ${eventName}!`);
+      window.setTimeout(() => navigate("/events"), 1200);
     } catch (err) {
       console.error("Error submitting registration:", err);
-      alert("Something went wrong. Please try again.");
+      setSubmitMessage(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -102,21 +100,18 @@ const EventRegistrationForm: React.FC = () => {
           {"Event Registration"}
         </h2>
 
-        {/* Name */}
         <label>Your name</label>
-        <input placeholder="First" {...register("firstName", { required: "First Name is required" })} />
-        {errors.firstName && <p className="error">{errors.firstName.message}</p>}
-        <input placeholder="Last" {...register("lastName", { required: "Last Name is required" })} />
-        {errors.lastName && <p className="error">{errors.lastName.message}</p>}
+          <input placeholder="First" {...register("firstName", { required: "First Name is required" })} />
+          {errors.firstName && <p className="error">{errors.firstName.message}</p>}
+          <input placeholder="Last" {...register("lastName", { required: "Last Name is required" })} />
+          {errors.lastName && <p className="error">{errors.lastName.message}</p>}
 
-        {/* Email */}
-        <label>Email</label>
-        <input placeholder="Emal Address" {...register("email", { required: "Email is required", pattern: { value: /^\S+@\S+$/i, message: "Invalid email" }})} />
-        {errors.email && <p className="error">{errors.email.message}</p>}
+          <label>Email</label>
+          <input placeholder="Email Address" {...register("email", { required: "Email is required", pattern: { value: /^\S+@\S+$/i, message: "Invalid email" }})} />
+          {errors.email && <p className="error">{errors.email.message}</p>}
 
-        {/* Phone */}
-        <label>Phone (optional)</label>
-        <input {...register("phone")} />
+          <label>Phone (optional)</label>
+          <input type="tel" autoComplete="tel" {...register("phone")} />
 
         {/* Attendees */}
         <label>Number of Attendees</label>
@@ -136,14 +131,20 @@ const EventRegistrationForm: React.FC = () => {
 
         {/* Agreement */}
         <div className="terms-group">
-          <li className="conditions-link"><Link to="/privacy">Terms & Conditions</Link></li>
+          <input
+            className="terms-checkbox"
+            type="checkbox"
+            {...register("agree", { required: "You must agree before submitting" })}
+          />
+          <span>I agree to the <Link to="/privacy">Terms & Conditions</Link></span>
         </div>
-        {errors.agree && <p className="error">You must agree before submitting.</p>}
+        {errors.agree && <p className="error">{errors.agree.message}</p>}
 
         {/* Submit */}
-        <button type="submit" className="submit-btn">
-          Register
+        <button type="submit" className="submit-btn" disabled={submitting}>
+          {submitting ? "Registering…" : "Register"}
         </button>
+        {submitMessage && <p className="submit-message" role="status">{submitMessage}</p>}
       </form>
     </main>
   );

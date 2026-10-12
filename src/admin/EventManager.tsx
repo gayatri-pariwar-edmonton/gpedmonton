@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./EventManager.css";
+import { adminFetch } from "../utils/adminAuth";
 
 interface UpcomingEvent {
   _id?: string;
@@ -54,8 +55,8 @@ const EventManager: React.FC = () => {
   // Load events on mount
   useEffect(() => {
     Promise.all([
-      fetch("https://gpedmonton-backend.onrender.com/api/events/upcoming").then((r) => r.json()),
-      fetch("https://gpedmonton-backend.onrender.com/api/events/past").then((r) => r.json()),
+      adminFetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/events/upcoming").then((r) => r.json()),
+      adminFetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/events/past").then((r) => r.json()),
     ])
       .then(([upcomingData, pastData]) => {
         setUpcoming(Array.isArray(upcomingData) ? upcomingData : []);
@@ -105,18 +106,18 @@ const EventManager: React.FC = () => {
         // Save to Past Event collection
         formData.append("title", name); // Past events use `title`
         formData.append("image", imageFile);
-        url = "https://gpedmonton-backend.onrender.com/api/events/past/upload";
+        url = "https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/events/past/upload";
       } else {
         // Save to Upcoming Event collection
         formData.append("name", name);
         formData.append("desc", desc);
         formData.append("timestamp", String(timestamp));
         formData.append("image", imageFile);
-        url = "https://gpedmonton-backend.onrender.com/api/events/upcoming/upload";
+        url = "https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/events/upcoming/upload";
       }
 
       try {
-        const res = await fetch(url, { method: "POST", body: formData });
+        const res = await adminFetch(url, { method: "POST", body: formData });
         const data = await res.json();
 
         if (isPast) setPast((prev) => [...prev, data]);
@@ -134,10 +135,10 @@ const EventManager: React.FC = () => {
       const { title } = newPast;
       formData.append("title", title);
       formData.append("image", imageFile);
-      url = "https://gpedmonton-backend.onrender.com/api/events/past/upload";
+      url = "https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/events/past/upload";
 
       try {
-        const res = await fetch(url, { method: "POST", body: formData });
+        const res = await adminFetch(url, { method: "POST", body: formData });
         const data = await res.json();
         setPast((prev) => [...prev, data]);
         setNewPast({ title: "" });
@@ -155,9 +156,9 @@ const EventManager: React.FC = () => {
     if (!id) return;
     const endpoint =
       view === "upcoming"
-        ? `https://gpedmonton-backend.onrender.com/api/events/upcoming/${id}`
-        : `https://gpedmonton-backend.onrender.com/api/events/past/${id}`;
-    await fetch(endpoint, { method: "DELETE" });
+        ? `https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/events/upcoming/${id}`
+        : `https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/events/past/${id}`;
+    await adminFetch(endpoint, { method: "DELETE" });
     if (view === "upcoming")
       setUpcoming((prev) => prev.filter((e) => e._id !== id));
     else setPast((prev) => prev.filter((e) => e._id !== id));
@@ -242,7 +243,7 @@ const EventManager: React.FC = () => {
         {(view === "upcoming" ? upcomingEvents : pastEvents).map((event) => (
           <div key={event._id} className="event-item">
             <img
-              src={`https://gpedmonton-backend.onrender.com/api/proxy/image/${event.driveFileId}`}
+              src={`https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/proxy/image/${event.driveFileId}`}
               alt={"name" in event ? event.name : event.title}
             />
             <div>

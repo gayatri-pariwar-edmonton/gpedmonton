@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { PiMicrosoftExcelLogoLight } from "react-icons/pi";
 import "./DataManager.css"; // reuse existing styles
+import { adminFetch } from "../utils/adminAuth";
 
 interface Registration {
   _id: string;
@@ -30,8 +31,8 @@ const DataManager: React.FC = () => {
     const fetchData = async () => {
       try {
         const [regsRes, subsRes] = await Promise.all([
-          fetch("https://gpedmonton-backend.onrender.com/api/registrations"),
-          fetch("https://gpedmonton-backend.onrender.com/api/subscribe"),
+          adminFetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/registrations"),
+          adminFetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/subscribe"),
         ]);
         const [regsData, subsData] = await Promise.all([regsRes.json(), subsRes.json()]);
         setRegistrations(regsData);

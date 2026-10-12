@@ -19,7 +19,7 @@ const Contact: React.FC = () => {
     console.log("Submitted data:", formData);
     // send data to backend / API here
     try {
-      const res = await fetch("https://gpedmonton-backend.onrender.com/api/mail/contact", {
+      const res = await fetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/mail/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData), // send exactly name, email, message

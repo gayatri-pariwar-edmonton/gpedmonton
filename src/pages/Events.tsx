@@ -9,8 +9,8 @@ const Events: React.FC = () => {
 
   useEffect(() => {
     Promise.all([
-        fetch("https://gpedmonton-backend.onrender.com/api/events/upcoming").then(res => res.json()),
-        fetch("https://gpedmonton-backend.onrender.com/api/events/past").then(res => res.json())
+        fetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/events/upcoming").then(res => res.json()),
+        fetch("https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/events/past").then(res => res.json())
     ])
     .then(([upcomingData, pastData]) => {
         setUpcoming(Array.isArray(upcomingData) ? upcomingData : []);
@@ -31,7 +31,7 @@ const Events: React.FC = () => {
               <EventCard
                 key={event._id}
                 name={event.name}
-                image={`https://gpedmonton-backend.onrender.com/api/proxy/image/${event.driveFileId}`}
+                image={`https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/proxy/image/${event.driveFileId}`}
                 desc={event.desc}
                 timestamp={event.timestamp}
               />
@@ -49,7 +49,7 @@ const Events: React.FC = () => {
             pastEvents.map(event => (
               <div key={event._id}>
                 <img
-                  src={`https://gpedmonton-backend.onrender.com/api/proxy/image/${event.driveFileId}`}
+                  src={`https://gpedmonton-api.gpedmonton-cloudflare.workers.dev/api/proxy/image/${event.driveFileId}`}
                   alt={event.name}
                   className="past-event-img"
                 />

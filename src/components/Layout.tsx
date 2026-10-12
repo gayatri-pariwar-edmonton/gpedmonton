@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
+import MobileActionBar from "./MobileActionBar";
 
 
 const Layout: React.FC = () => {
@@ -57,6 +58,7 @@ const Layout: React.FC = () => {
         // onDonateClick={() => setIsDonateOpen(true)} /* Placeholder for other buttons of registration */
       />
       <Outlet context={{ setIsRegisterOpen, loadRef }} />
+      <MobileActionBar />
     </>
   );
 };
